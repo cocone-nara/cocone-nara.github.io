@@ -15,6 +15,18 @@
         h=d.documentElement,t=setTimeout(function(){h.className=h.className.replace(/\bwf-loading\b/g,"")+" wf-inactive";},config.scriptTimeout),tk=d.createElement("script"),f=false,s=d.getElementsByTagName("script")[0],a;h.className+=" wf-loading";tk.src='https://use.typekit.net/'+config.kitId+'.js';tk.async=true;tk.onload=tk.onreadystatechange=function(){a=this.readyState;if(f||a&&a!="complete"&&a!="loaded")return;f=true;clearTimeout(t);try{Typekit.load(config)}catch(e){}};s.parentNode.insertBefore(tk,s)
       })(document);
     </script>
+    <script type="importmap">
+    {
+      "imports": {
+        // THREE のコアモジュール名 'three' を CDN の URL にマッピング
+        "three": "https://unpkg.com/three@0.160.1/build/three.module.js",
+        
+        // 付属モジュール（OrbitControlsなど）を扱うための 'three/addons/' をマッピング
+        // unpkgのバージョン 0.160.1 の場合のパスに合わせます。
+        "three/examples/jsm/": "https://unpkg.com/three@0.160.1/examples/jsm/"
+      }
+    }
+    </script>
 </head>
 <body>
     

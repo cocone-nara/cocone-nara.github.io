@@ -1,7 +1,7 @@
 // Three.jsのインポート
 import * as THREE from 'three';
 import {OrbitControls} from 'three/examples/jsm/controls/OrbitControls.js';
-import { TextureLoader } from 'three/src/loaders/TextureLoader.js';
+//import { TextureLoader } from 'three/src/loaders/TextureLoader.js';
 
 //既存テクスチャ読み込み用
 const baseTextureImage = new Image();
