@@ -1,0 +1,56 @@
+html, body {
+    width: 100%;
+}
+
+body {
+    /* ブラウザ既定の余白をリセット */
+    margin: 0;
+    padding: 0;
+    overflow: hidden; /* スクロールバーを非表示 */
+    display: flex;
+    font-family: sans-serif;
+    height: 100vh;
+}
+
+#control-panel {
+    /* 左側のコントロールパネル（入力画面） */
+    width: 300px; /* 幅を固定 */
+    height: 100vh;
+    padding: 20px;
+    background-color: #f4f4f4;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.control-group {
+    width: 100%;
+}
+
+#x3d-container {
+    /* 右側の3D表示エリア */
+    flex-grow: 1;
+    height: 100vh;
+    position: relative;
+}
+
+#font-size-input,
+#font-family-input {
+    width: 100%; 
+    padding: 8px;
+    box-sizing: border-box;
+    font-size: 1.1em;
+}
+
+#text-input {
+    width: 100%;
+    min-height: 100px;
+    padding: 10px;
+    box-sizing: border-box;
+    font-size: 1.1em; 
+}
+
+#control-panel p {
+    margin-bottom: 5px;
+}

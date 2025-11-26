@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>3D Text Generator</title>
+    <link rel="stylesheet" href="/style.css">
+    <script>
+      (function(d) {
+        var config = {
+          kitId: 'jzc7gce',
+          scriptTimeout: 3000,
+          async: true
+        },
+        h=d.documentElement,t=setTimeout(function(){h.className=h.className.replace(/\bwf-loading\b/g,"")+" wf-inactive";},config.scriptTimeout),tk=d.createElement("script"),f=false,s=d.getElementsByTagName("script")[0],a;h.className+=" wf-loading";tk.src='https://use.typekit.net/'+config.kitId+'.js';tk.async=true;tk.onload=tk.onreadystatechange=function(){a=this.readyState;if(f||a&&a!="complete"&&a!="loaded")return;f=true;clearTimeout(t);try{Typekit.load(config)}catch(e){}};s.parentNode.insertBefore(tk,s)
+      })(document);
+    </script>
+</head>
+<body>
+    
+<div id="control-panel">
+    <h2>木札見本ジェネレータ</h2>
+    
+    <div class="control-group">
+        <p>表示したい文字を入力してください:</p>
+        <textarea id="text-input" placeholder="例: 木彫り看板">試作品</textarea>
+    </div>
+
+    <div class="control-group">
+        <p>フォントを選択:</p>
+        <select id="font-family-input">
+            <option value="sans-serif">システムフォント (ゴシック系)</option>
+            <option value="ta-fuga-fude" selected>風雅筆</option>
+            <option value="kokuryu">黒龍爽</option>
+            <option value="ab-ootori">鳳</option>
+            <option value="ab-togetsukanteiryu">渡月勘亭流</option>
+            <option value="ta-engeifude">演芸筆</option>
+        </select>
+    </div>
+
+    <div class="control-group">
+        <p>文字サイズ (px):</p>
+        <input type="number" id="font-size-input" min="10" max="200" step="5" value="120">
+    </div>
+
+    <div class="control-group" id="texture-select">
+        <p>背景テクスチャを選択:</p>
+        <label>
+            <input type="radio" name="bg-texture" value="rect_1_2.png" checked> 
+            カドあり
+        </label><br>
+        <label>
+            <input type="radio" name="bg-texture" value="rect_2_2.png"> 
+            カド削り
+        </label>
+    </div>
+
+</div>
+
+    <div id="x3d-container">
+        </div>
+
+    <script type="module" src="/main.js"></script>
+</body>
+</html>
