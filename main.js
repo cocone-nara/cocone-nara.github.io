@@ -257,16 +257,74 @@ function initializeThreeJS(){
     loadBaseTexture(initialTextureFile);
     //updatePlaneTexture(initialText);
     
-    function handleInputChange() {
+    async function handleUpdateButtonClick() {
+        const textValue = textInput.value;
+        const currentFont = fontFamilyInput.value;
+
+        if (typeof Typekit !== 'undefined' && Typekit.load){
+                Typekit.load({kitId: 'jzc7gce'});
+            }
+        if (currentFont !== 'sans-serif' && textValue.length > 0) {
+            console.log(`フォント「${currentFont}」のロードを待機中...`);
+            await waitForFont(currentFont, textValue);
+        console.log('フォントのロード完了。テクスチャを更新します。');
+        }
         // すべての必要なリソース（背景テクスチャ、木目テクスチャ）がロードされているか確認
         if (baseTextureImage.complete && woodTexture && woodTexture.image.complete) {
-            // 💡 引数なしで updatePlaneTextures を呼び出す
-            updatePlaneTexture(textInput.value);
+            updatePlaneTexture(textValue);
         }
     }
     
+    //更新ボタンクリック時処理
+    const updateButton = document.getElementById('update-button');
+    if (updateButton) {
+        updateButton.addEventListener('click', handleUpdateButtonClick);
+    }
     // 1. テキスト、フォントサイズ入力のイベント handleinputchangeを呼び出して更新
-    textInput.addEventListener('input', handleInputChange);
-    fontSizeInput.addEventListener('input', handleInputChange);
-    fontFamilyInput.addEventListener('change', handleInputChange);
+    //textInput.addEventListener('input', handleUpdateButtonClick);
+    //fontSizeInput.addEventListener('input', handleUpdateButtonClick);
+    //fontFamilyInput.addEventListener('change', handleUpdateButtonClick);
 }
+
+/**
+ * 指定されたフォントが、特定のテキストに対して利用可能になるまで待機する
+ * @param {string} fontName - フォントファミリー名 (例: 'ta-fuga-fude')
+ * @param {string} text - 検出対象のテキスト
+ * @returns {Promise<void>}
+ */
+const waitForFont = (fontName, text) => {
+    // 1. ダミー要素を作成し、ブラウザに新しいグリフのダウンロードを促す
+    const $dummyText = document.createElement("div");
+    $dummyText.textContent = text;
+    // フォント名を引用符で囲んで設定（Canvas描画と同じ設定）
+    $dummyText.style.fontFamily = `"${fontName}", sans-serif`;
+    $dummyText.style.position = "absolute"; 
+    $dummyText.style.top = "-9999px"; 
+    $dummyText.style.visibility = "hidden";
+    document.body.appendChild($dummyText);
+    
+    return new Promise((resolve) => {
+        let attempts = 0;
+        const maxAttempts = 100; // 最大10秒待つ (100ms * 100回)
+
+        const checkFontStatus = () => {
+            attempts++;
+            
+            // 2. document.fonts.check() でフォントが読み込まれたかを確認
+            // 'middle'ベースラインに合わせたサイズでチェック
+            const isFontReady = document.fonts.check(`120px "${fontName}"`, text);
+
+            if (isFontReady || attempts >= maxAttempts) {
+                // ロード完了、またはタイムアウト
+                $dummyText.remove();
+                resolve();
+                return;
+            }
+            
+            // 3. 100ミリ秒後に再チェック
+            setTimeout(checkFontStatus, 100);
+        };
+        
+        checkFontStatus();
+    });
+};

@@ -5,16 +5,21 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>3D Text Generator</title>
     <link rel="stylesheet" href="/style.css">
-    <script>
-      (function(d) {
-        var config = {
-          kitId: 'jzc7gce',
-          scriptTimeout: 3000,
-          async: true
-        },
-        h=d.documentElement,t=setTimeout(function(){h.className=h.className.replace(/\bwf-loading\b/g,"")+" wf-inactive";},config.scriptTimeout),tk=d.createElement("script"),f=false,s=d.getElementsByTagName("script")[0],a;h.className+=" wf-loading";tk.src='https://use.typekit.net/'+config.kitId+'.js';tk.async=true;tk.onload=tk.onreadystatechange=function(){a=this.readyState;if(f||a&&a!="complete"&&a!="loaded")return;f=true;clearTimeout(t);try{Typekit.load(config)}catch(e){}};s.parentNode.insertBefore(tk,s)
-      })(document);
-    </script>
+<script>
+  (function(d) {
+    var config = {
+      kitId: 'jzc7gce',
+      scriptTimeout: 3000,
+      async: true,
+      active: function() {
+          if (typeof window.triggerInitialUpdate === 'function') {
+              window.triggerInitialUpdate();
+          }
+      }
+    },
+    h=d.documentElement,t=setTimeout(function(){h.className=h.className.replace(/\bwf-loading\b/g,"")+" wf-inactive";},config.scriptTimeout),tk=d.createElement("script"),f=false,s=d.getElementsByTagName("script")[0],a;h.className+=" wf-loading";tk.src='https://use.typekit.net/'+config.kitId+'.js';tk.async=true;tk.onload=tk.onreadystatechange=function(){a=this.readyState;if(f||a&&a!="complete"&&a!="loaded")return;f=true;clearTimeout(t);try{Typekit.load(config)}catch(e){}};s.parentNode.insertBefore(tk,s)
+  })(document);
+</script>
 <script type="importmap">
 {
   "imports": {
@@ -30,9 +35,15 @@
     <h2>木札見本ジェネレータ</h2>
     
     <div class="control-group">
+        <button id="update-button" class="action-button">モデルを更新</button>
+        <!--<p class="note">※新しい漢字を入力した際、文字化けする場合はこのボタンを押してください。</p> -->
+    </div>
+
+    <div class="control-group">
         <p>表示したい文字を入力してください:</p>
         <textarea id="text-input" placeholder="例: 木彫り看板">試作品</textarea>
     </div>
+
 
     <div class="control-group">
         <p>フォントを選択:</p>
