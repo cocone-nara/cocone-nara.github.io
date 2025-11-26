@@ -180,7 +180,7 @@ function initializeThreeJS(){
         //});
         //縦書き文字 bumpCanvasにdraw
         //const totalTextHeight = characters.length * FONT_SIZE;
-        const blockTopY = (CANVAS_SIZE / 2) - (totalAdjustedHeight / 2)+16;
+        const blockTopY = (CANVAS_SIZE / 2) - (totalAdjustedHeight / 2)+23;
         let currentY = blockTopY + (FONT_SIZE / 2);
         characters.forEach((char, index) =>{
             b_ctx.fillText(char, centerX, currentY);
