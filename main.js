@@ -269,10 +269,4 @@ function initializeThreeJS(){
     textInput.addEventListener('input', handleInputChange);
     fontSizeInput.addEventListener('input', handleInputChange);
     fontFamilyInput.addEventListener('change', handleInputChange);
-    
-    //textInput.addEventListener('input', () =>{
-    //    if (baseTextureImage.complete) {
-    //        updatePlaneTexture(textInput.value);
-    //        }
-    //});
 }
