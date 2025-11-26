@@ -56,6 +56,7 @@ function initializeThreeJS(){
     const camera = new THREE.PerspectiveCamera( 45, width/ height, 0.1, 1000);
     const renderer = new THREE.WebGLRenderer({antialias: true});
     renderer.setSize( width, height);
+    renderer.setClearColor(0xD0D0D0);
 
     //HTML表示用
     container.appendChild( renderer.domElement);
@@ -77,7 +78,7 @@ function initializeThreeJS(){
     planeMaterial = new THREE.MeshStandardMaterial({
         color:0xcccccc,
         metalness:0.1,
-        roughness:0.5
+        roughness:0.3
     });
     const plane =new THREE.Mesh(planeGeometry, planeMaterial);
     scene.add(plane);
@@ -97,10 +98,10 @@ function initializeThreeJS(){
     animate();
 
     //ライティング
-    const ambientLight = new THREE.AmbientLight(0xffdd99,1.5);
+    const ambientLight = new THREE.AmbientLight(0xffcc77,1.5);
     scene.add(ambientLight);
-    const pointLight = new THREE.PointLight(0xffffff,100);
-    pointLight.position.set(5,5,5);
+    const pointLight = new THREE.PointLight(0xffddaa,50);
+    pointLight.position.set(2,4,5);
     scene.add(pointLight);
 
     //既存テクスチャのロード、切り替え

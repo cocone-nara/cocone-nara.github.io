@@ -54,3 +54,33 @@ body {
 #control-panel p {
     margin-bottom: 5px;
 }
+
+
+@media (max-width: 600px) {
+    
+    body {
+        flex-direction: column;
+        overflow-y: auto; 
+    }
+
+    #x3d-container {
+        width: 100%;
+        height: 60vh; /* 画面の高さの60%を使用 */
+        order: 1; /* control-panelより上に配置 */
+    }
+
+    #control-panel {
+        width: 100%;
+        height: auto; /* 内容に応じて高さを自動調整 */
+        padding: 10px;
+        order: 2; /* x3d-containerより下に配置 */
+    }
+
+    #control-panel .control-group {
+        width: 100%;
+        margin-bottom: 15px;
+    }
+    #font-size-input, .action-button, #font-family-input {
+        max-width: 100%;
+    }
+}
