@@ -30,9 +30,10 @@
 </script>
 </head>
 <body>
-    
-<div id="control-panel">
+<div id="app-header">
     <h2>木札見本ジェネレータ</h2>
+</div>
+<div id="control-panel">
     
     <div class="control-group">
         <button id="update-button" class="action-button">モデルを更新</button>
@@ -57,9 +58,11 @@
         </select>
     </div>
 
-    <div class="control-group">
-        <p>文字サイズ (px):</p>
-        <input type="number" id="font-size-input" min="10" max="200" step="5" value="120">
+<div class="control-group">
+        <p>文字サイズ (px):
+            <span id="font-size-value">120</span>
+        </p>
+        <input type="range" id="font-size-input" min="50" max="150" step="10" value="120">
     </div>
 
     <div class="control-group" id="texture-select">

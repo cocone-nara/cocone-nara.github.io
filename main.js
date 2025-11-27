@@ -3,6 +3,11 @@ import * as THREE from 'three';
 import {OrbitControls} from 'three/examples/jsm/controls/OrbitControls.js';
 //import { TextureLoader } from 'three/src/loaders/TextureLoader.js';
 
+//----------文字サイズスライダー用----------
+const fontSizeInput = document.getElementById('font-size-input');
+const fontSizeValue = document.getElementById('font-size-value');
+
+
 //既存テクスチャ読み込み用
 const baseTextureImage = new Image();
 baseTextureImage.crossOrigin = "anonymous";
@@ -28,6 +33,15 @@ const FONT_SPACING_ADJUSTMENTS = {
 };
 
 //ここから処理-------------------
+
+// スライダーの値が変更されたときの処理
+fontSizeInput.addEventListener('input', (event) => {
+    fontSizeValue.textContent = event.target.value;
+});
+window.addEventListener('load', () => {
+    fontSizeValue.textContent = fontSizeInput.value;
+});
+
 //ページの描画が終わるまで待ち、初期化関数を実行する
 window.addEventListener('DOMContentLoaded', () => {
 
@@ -75,6 +89,7 @@ function initializeThreeJS(){
     const planeWidth = 2.5;
     const planeHeight = 6;
     const planeGeometry = new THREE.PlaneGeometry(planeWidth, planeHeight);
+    planeGeometry.computeTangents();
     planeMaterial = new THREE.MeshStandardMaterial({
         color:0xcccccc,
         metalness:0.1,
@@ -92,7 +107,6 @@ function initializeThreeJS(){
     function animate(){
         requestAnimationFrame(animate);
         controls.update();
-
         renderer.render(scene,camera);
     }
     animate();
@@ -183,31 +197,6 @@ function initializeThreeJS(){
         }
         drawText(b_ctx, 'white');
 
-        //------ラフネスマップ作成--------
-        const roughCanvas = document.createElement('canvas');
-        roughCanvas.width = CANVAS_SIZE;
-        roughCanvas.height = CANVAS_SIZE;
-        const r_ctx = roughCanvas.getContext('2d');
-        //バンプマップを転写
-        r_ctx.drawImage(bumpCanvas, 0, 0);
-        // 2. 画像データを取得
-        const imageData = r_ctx.getImageData(0, 0, CANVAS_SIZE, CANVAS_SIZE);
-        const data = imageData.data;
-        // 3. 白黒を反転させる
-        for (let i = 0; i < data.length; i += 4) {
-            // RGBの平均値 (輝度) を計算
-            const avg = (data[i] + data[i + 1] + data[i + 2]) / 3;
-
-            // 反転した値 (255 - avg) を R, G, B に適用
-            const inverted = 255 - avg;
-            data[i] = inverted;     // R
-            data[i + 1] = inverted; // G
-            data[i + 2] = inverted; // B
-            // data[i + 3] (Alpha) は変更しない
-        }
-        r_ctx.putImageData(imageData, 0, 0);
-
-
         //-----アルベドテクスチャの作成 木目読み込み-----
         const albedoCanvas = document.createElement('canvas');
         albedoCanvas.width = CANVAS_SIZE;
@@ -237,12 +226,31 @@ function initializeThreeJS(){
         //テクスチャ作成 マテリアル設定
         const bumpTexture = new THREE.CanvasTexture(bumpCanvas);
         const albedoTexture = new THREE.CanvasTexture(albedoCanvas);
-        const roughnessTexture = new THREE.CanvasTexture(roughCanvas);
         planeMaterial.bumpMap = bumpTexture;
         planeMaterial.bumpScale = 8;
         planeMaterial.map = albedoTexture;
-        planeMaterial.roughnessMap = roughnessTexture;
+        planeMaterial.roughnessMap = bumpTexture;
         planeMaterial.roughness = 1.0;
+
+    planeMaterial.onBeforeCompile = (shader) => {
+        if (shader.fragmentShader.includes('#define ROUGHNESS_INVERTED')) {
+            return; // 挿入済みなら何もしない
+        }
+        shader.fragmentShader = `#define ROUGHNESS_INVERTED\n` + shader.fragmentShader;
+        const roughnessSampleLine = '#include <roughnessmap_fragment>';
+        shader.fragmentShader = shader.fragmentShader.replace(
+            roughnessSampleLine,
+            `
+            float roughnessFactor = roughness;
+            #ifdef USE_ROUGHNESSMAP
+                vec4 texelRoughness = texture2D( roughnessMap, vRoughnessMapUv );
+                float invertedRoughness = ( 1.0 - texelRoughness.g ); 
+                float blendedRoughness = mix (0.5, invertedRoughness, 0.6);
+                roughnessFactor *= blendedRoughness;
+            #endif
+            `
+        );
+    };
 
         //縦横比調整
         const planeWidth = 2.5;
@@ -250,11 +258,11 @@ function initializeThreeJS(){
         const aspect = planeHeight / planeWidth;
         const offsetX = (1- (1/aspect))/2;
         //各テクスチャに適用
-        [bumpTexture, albedoTexture, roughnessTexture].forEach(tex => {
+        [bumpTexture, albedoTexture].forEach(tex => {
             tex.repeat.set(1/ aspect, 1);
             tex.offset.set(offsetX, 0.0);
             tex.colorSpace = THREE.SRGBColorSpace;
-            if(tex === bumpTexture || tex === roughnessTexture) {
+            if(tex === bumpTexture) {
                 tex.colorSpace = THREE.NoColorSpace;
             }
             tex.needsUpdate = true; 
