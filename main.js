@@ -135,34 +135,16 @@ function initializeThreeJS(){
         const fontFamilyInput = document.getElementById('font-family-input');
         const FONT_FAMILY = fontFamilyInput.value || 'sans-serif';
         let FONT_SIZE = parseInt(fontSizeInput.value, 10);
+
+        const scaleFactor = CANVAS_SIZE / 512;
         if (isNaN(FONT_SIZE) || FONT_SIZE < 10) {
         FONT_SIZE = 120;
         }   
+        FONT_SIZE = FONT_SIZE * scaleFactor;
         console.log(FONT_SIZE);
 
-        //-----バンプマップ作成 背景と文字-----
-        const bumpCanvas = document.createElement('canvas');
-        bumpCanvas.width = CANVAS_SIZE;
-        bumpCanvas.height = CANVAS_SIZE;
-        const b_ctx = bumpCanvas.getContext('2d');
-
-        //背景色
-        b_ctx.fillStyle = 'black';
-        b_ctx.fillRect(0,0, CANVAS_SIZE, CANVAS_SIZE);
-
-        //枠用テクスチャのdraw
-        if (baseTextureImage && baseTextureImage.complete) {
-                b_ctx.drawImage(baseTextureImage, 0, 0, CANVAS_SIZE, CANVAS_SIZE);
-            }
-
-        //文字の描画
-        b_ctx.fillStyle = 'white';
-        b_ctx.font = `bold ${FONT_SIZE}px ${FONT_FAMILY}`;
-        b_ctx.textAlign = 'center';
-        b_ctx.textBaseline = 'middle';
+        //字間調整 テキストエリアの高さを計算 文字数*フォント別字間
         const characters = text.split('');
-        const centerX = CANVAS_SIZE/2;
-        //行間調整によるテキストエリアの高さを計算 文字数*フォント別字間
         const percentspacingAdjustment = FONT_SPACING_ADJUSTMENTS[FONT_FAMILY] || 0;
         const spacingAdjustment = percentspacingAdjustment * FONT_SIZE;
         const numCharacters = characters.length;
@@ -170,34 +152,71 @@ function initializeThreeJS(){
         if (numCharacters > 0) {
             totalAdjustedHeight = numCharacters * FONT_SIZE + (numCharacters - 1) * spacingAdjustment;
         }
-        //文字横書き
-        //const centerY = CANVAS_SIZE/2;
-        //const lines = text.split('\n');
-        //const lineheight =80;
-        //const startY = centerY - ((lines.length -1) * lineheight /2 );
-        //    lines.forEach((line, index) =>{
-        //    const y = startY + index * lineheight;
-        //    ctx.fillText(line, centerX,y);
-        //});
-        //縦書き文字 bumpCanvasにdraw
-        //const totalTextHeight = characters.length * FONT_SIZE;
+        const centerX = CANVAS_SIZE/2;
         const blockTopY = (CANVAS_SIZE / 2) - (totalAdjustedHeight / 2)+23;
-        let currentY = blockTopY + (FONT_SIZE / 2);
-        characters.forEach((char, index) =>{
-            b_ctx.fillText(char, centerX, currentY);
-            currentY += FONT_SIZE + spacingAdjustment;
-        });
+
+        //文字描画関数
+        function drawText(ctx, color){
+            ctx.fillStyle = 'white';
+            ctx.font = `bold ${FONT_SIZE}px ${FONT_FAMILY}`;
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            let currentY = blockTopY + (FONT_SIZE / 2);
+            characters.forEach((char, index) =>{
+                ctx.fillText(char, centerX, currentY);
+                currentY += FONT_SIZE + spacingAdjustment;
+            });
+        }   
+        //------------初期設定ここまで------------
+
+        //-----バンプマップ作成 背景と文字-----
+        const bumpCanvas = document.createElement('canvas');
+        bumpCanvas.width = CANVAS_SIZE;
+        bumpCanvas.height = CANVAS_SIZE;
+        const b_ctx = bumpCanvas.getContext('2d');
+        //背景色
+        b_ctx.fillStyle = 'black';
+        b_ctx.fillRect(0,0, CANVAS_SIZE, CANVAS_SIZE);
+        //枠用テクスチャのdraw
+        if (baseTextureImage && baseTextureImage.complete) {
+                b_ctx.drawImage(baseTextureImage, 0, 0, CANVAS_SIZE, CANVAS_SIZE);
+        }
+        drawText(b_ctx, 'white');
+
+        //------ラフネスマップ作成--------
+        const roughCanvas = document.createElement('canvas');
+        roughCanvas.width = CANVAS_SIZE;
+        roughCanvas.height = CANVAS_SIZE;
+        const r_ctx = roughCanvas.getContext('2d');
+        //バンプマップを転写
+        r_ctx.drawImage(bumpCanvas, 0, 0);
+        // 2. 画像データを取得
+        const imageData = r_ctx.getImageData(0, 0, CANVAS_SIZE, CANVAS_SIZE);
+        const data = imageData.data;
+        // 3. 白黒を反転させる
+        for (let i = 0; i < data.length; i += 4) {
+            // RGBの平均値 (輝度) を計算
+            const avg = (data[i] + data[i + 1] + data[i + 2]) / 3;
+
+            // 反転した値 (255 - avg) を R, G, B に適用
+            const inverted = 255 - avg;
+            data[i] = inverted;     // R
+            data[i + 1] = inverted; // G
+            data[i + 2] = inverted; // B
+            // data[i + 3] (Alpha) は変更しない
+        }
+        r_ctx.putImageData(imageData, 0, 0);
+
 
         //-----アルベドテクスチャの作成 木目読み込み-----
         const albedoCanvas = document.createElement('canvas');
         albedoCanvas.width = CANVAS_SIZE;
         albedoCanvas.height = CANVAS_SIZE;
         const a_ctx = albedoCanvas.getContext('2d');
-        // a) ベースレイヤー: 木目テクスチャの描画
+        // a) ベースレイヤー: 木目テクスチャの描画,テクスチャがないときの代替色
         if (woodTexture && woodTexture.image.complete) {
             a_ctx.drawImage(woodTexture.image, 0, 0, CANVAS_SIZE, CANVAS_SIZE);
         } else {
-            // 木目テクスチャがない場合の代替色
             a_ctx.fillStyle = '#8B4513'; 
             a_ctx.fillRect(0, 0, CANVAS_SIZE, CANVAS_SIZE);
         }
@@ -211,36 +230,37 @@ function initializeThreeJS(){
 
         //-----テクスチャをマテリアルに適用-----
         //初期化
-        if(planeMaterial.bumpMap){
-            planeMaterial.bumpMap.dispose();
-            planeMaterial.map.dispose();
-        }
+        if(planeMaterial.bumpMap) planeMaterial.bumpMap.dispose();
+        if(planeMaterial.map) planeMaterial.map.dispose();
+        if(planeMaterial.roughnessMap) planeMaterial.roughnessMap.dispose();
 
-        //テクスチャ作成
+        //テクスチャ作成 マテリアル設定
         const bumpTexture = new THREE.CanvasTexture(bumpCanvas);
+        const albedoTexture = new THREE.CanvasTexture(albedoCanvas);
+        const roughnessTexture = new THREE.CanvasTexture(roughCanvas);
         planeMaterial.bumpMap = bumpTexture;
         planeMaterial.bumpScale = 8;
-
-        const albedoTexture = new THREE.CanvasTexture(albedoCanvas);
         planeMaterial.map = albedoTexture;
-
-
+        planeMaterial.roughnessMap = roughnessTexture;
+        planeMaterial.roughness = 1.0;
 
         //縦横比調整
         const planeWidth = 2.5;
         const planeHeight = 6;
         const aspect = planeHeight / planeWidth;
         const offsetX = (1- (1/aspect))/2;
-        //テクスチャに適用
-        bumpTexture.repeat.set(1/ aspect,1);
-        bumpTexture.offset.set(offsetX,0);
-        albedoTexture.repeat.set(1/ aspect,1);
-        albedoTexture.offset.set(offsetX,0);
-        //マテリアル更新
+        //各テクスチャに適用
+        [bumpTexture, albedoTexture, roughnessTexture].forEach(tex => {
+            tex.repeat.set(1/ aspect, 1);
+            tex.offset.set(offsetX, 0.0);
+            tex.colorSpace = THREE.SRGBColorSpace;
+            if(tex === bumpTexture || tex === roughnessTexture) {
+                tex.colorSpace = THREE.NoColorSpace;
+            }
+            tex.needsUpdate = true; 
+        });
 
         planeMaterial.needsUpdate = true;
-        bumpTexture.needsUpdate = true;
-        albedoTexture.needsUpdate = true;
 
         // デバッグ用: <body>内に一時的に表示
         //document.body.appendChild(bumpCanvas);
