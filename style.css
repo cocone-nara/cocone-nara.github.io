@@ -227,15 +227,18 @@ input[type="range"]::-moz-range-thumb {
 
 #mobile-toggle-btn {
     position: absolute;
-    bottom: 24px;
-    right: 24px;
+    bottom: 36px;
+    right: 36px;
     z-index: 20;
-    padding: 12px 24px;
+    width: 100px;
+    height: 100px;
+    padding: 24px 20px;
     background-color: var(--accent-color);
     color: white;
+    font-size: 50px;
     border: none;
-    border-radius: 30px;
-    font-weight: bold;
+    border-radius: 50px;
+
     box-shadow: 0 4px 10px rgba(0,0,0,0.3);
     cursor: pointer;
 }
@@ -243,7 +246,7 @@ input[type="range"]::-moz-range-thumb {
 /* PC/タブレット表示時、モバイル用ボタンは非表示 */
 #mobile-toggle-btn { 
     opacity: 0;
-    pointer-events: none; /* クリック不可にする */
+    pointer-events: none;
     transition: opacity 0.3s;
 }
 
