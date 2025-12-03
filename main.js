@@ -1,3 +1,24 @@
+// このファイルの構成
+// canvasでテクスチャを生成しThreeで3Dを描画
+// フォントはadobefontのwebフォントから読み込み
+//     ダイナミック読み込み？ なので都度呼びかけて更新する必要がある
+// - 初期設定
+// - メイン処理
+//     - HTMLからテキストサイズを取得
+//     - はじめてアクセスしたとき ページを読み込んでからinitializeThreeJS()を実行し3D空間を描画
+// - 3D空間描画関数 initializeThreeJS()
+//     - 設定初期化 ライティングや基礎モデル（プリミティブ平面、マテリアル、テクスチャ読み込み）の作成
+//     - HTMLから枠テクスチャの選択状況を取得(正確にはラジオボタンが変更されたとき対応テクスチャを読み込み)
+//     - テクスチャ更新関数 updatePlaneTexture(text)
+//         - HTMLからテキストを取得（文字、フォント、サイズ）
+//         - バンプ、アルベド、ラフネステクスチャの作成更新
+//             - バンプ:取得したテキストと枠テクスチャの合成
+//             - アルベド：木目テクスチャとバンプの乗算
+//             - ラフネス：バンプの暗いところを荒くする シェーダーに介入して実現
+//     - ボタンを押して3D画面更新 handleUpdateButtonClick()
+//     - ボタンクリックの監視
+// - フォント更新時の待機処理 waitForFont functionではない？ webから拾ってきたので仕組みがわからん
+
 // Three.jsのインポート
 import * as THREE from 'three';
 import {OrbitControls} from 'three/examples/jsm/controls/OrbitControls.js';
@@ -298,21 +319,15 @@ function initializeThreeJS(){
             await waitForFont(currentFont, textValue);
             //console.log('フォントのロード完了。テクスチャを更新します。');
         }
-        // すべての必要なリソース（背景テクスチャ、木目テクスチャ）がロードされているか確認
+        // すべての必要なリソース（背景テクスチャ、木目テクスチャ）がロードされているか確認して更新
         if (baseTextureImage.complete && woodTexture && woodTexture.image.complete) {
             updatePlaneTexture(textValue);
         }
     }
-    
-    //更新ボタンクリック時処理
-    const updateButton = document.getElementById('update-button');
-    if (updateButton) {
-        updateButton.addEventListener('click', handleUpdateButtonClick);
-    }
-    // 1. テキスト、フォントサイズ入力のイベント handleinputchangeを呼び出して更新
-    //textInput.addEventListener('input', handleUpdateButtonClick);
-    //fontSizeInput.addEventListener('input', handleUpdateButtonClick);
-    //fontFamilyInput.addEventListener('change', handleUpdateButtonClick);
+    //window.addEventListener('triggerUpdate', async () => {
+        // 当関数外のonUpdateClickから発火されたら、既存の更新処理を実行
+    //    await handleUpdateButtonClick();
+    //});
 }
 
 /**
@@ -357,3 +372,60 @@ const waitForFont = (fontName, text) => {
         checkFontStatus();
     });
 };
+
+// === モバイル用パネル制御ロジック ===
+const controlPanel = document.getElementById('control-panel');
+const mobileToggleBtn = document.getElementById('mobile-toggle-btn');
+
+// パネルを開く関数
+function openMobilePanel() {
+    controlPanel.classList.add('is-open');
+    mobileToggleBtn.classList.add('is-hidden'); // 開いている間はボタンを隠す
+}
+
+// パネルを閉じる関数
+function closeMobilePanel() {
+    controlPanel.classList.remove('is-open');
+    // アニメーションが終わるころにボタンを再表示（CSSのtransitionに合わせる）
+    setTimeout(() => {
+        mobileToggleBtn.classList.remove('is-hidden');
+    }, 300);
+}
+
+// イベントリスナー設定
+if (mobileToggleBtn) {
+    mobileToggleBtn.addEventListener('click', openMobilePanel);
+}
+
+//ボタンを押したときの処理
+const updateButton = document.getElementById('update-button');
+async function onUpdateClick() {
+    // 初期：パネルを閉じる
+    if (window.innerWidth <= 768) {
+        closeMobilePanel();
+    }
+    // 外部から呼び出すためwindowオブジェクトにカスタムイベントを追加登録
+    window.dispatchEvent(new CustomEvent('triggerUpdate'));
+}
+if (updateButton) {
+    updateButton.addEventListener('click', onUpdateClick);
+}
+window.addEventListener('triggerUpdate', async () => {
+    // isInitialized が true（3D環境がセットアップ済み）の時だけ実行
+    if (isInitialized) { 
+        await handleUpdateButtonClick();
+    } else {
+        // 初期化がまだの場合はコンソールに警告などを出す
+        console.warn("初期化が完了していません。更新処理をスキップします。");
+    }
+});
+
+// 画面外をクリックしたら閉じる処理（任意）
+document.addEventListener('click', (e) => {
+    if (window.innerWidth <= 768 && controlPanel.classList.contains('is-open')) {
+        // パネル外、かつトグルボタン以外をクリックした場合
+        if (!controlPanel.contains(e.target) && !mobileToggleBtn.contains(e.target)) {
+            closeMobilePanel();
+        }
+    }
+});

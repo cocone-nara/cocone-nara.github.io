@@ -36,8 +36,7 @@
 <div id="control-panel">
     
     <div class="control-group">
-        <button id="update-button" class="action-button">モデルを更新</button>
-        <!--<p class="note">※新しい漢字を入力した際、文字化けする場合はこのボタンを押してください。</p> -->
+        <button id="update-button" class="action-button">フォントを更新</button>
     </div>
 
     <div class="control-group">
@@ -49,7 +48,7 @@
     <div class="control-group">
         <p>フォントを選択:</p>
         <select id="font-family-input">
-            <option value="sans-serif">システムフォント (ゴシック系)</option>
+            <option value="sans-serif">デフォルト</option>
             <option value="ta-fuga-fude" selected>風雅筆</option>
             <option value="kokuryu">黒龍爽</option>
             <option value="ab-ootori">鳳</option>
@@ -77,10 +76,13 @@
         </label>
     </div>
 
+    <!-- <button id="close-panel-btn" class="action-button secondary">閉じる</button> -->
+
 </div>
 
     <div id="x3d-container">
-        </div>
+        <button id="mobile-toggle-btn">文字・設定を変更</button>
+    </div>
 
     <script type="module" src="/main.js"></script>
 </body>
