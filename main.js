@@ -16,6 +16,7 @@
 //             - アルベド：木目テクスチャとバンプの乗算
 //             - ラフネス：バンプの暗いところを荒くする シェーダーに介入して実現
 //     - ボタンを押して3D画面更新 handleUpdateButtonClick()
+//         - updatePlaneTexture(text)を動かす
 //     - ボタンクリックの監視
 // - フォント更新時の待機処理 waitForFont functionではない？ webから拾ってきたので仕組みがわからん
 
@@ -43,6 +44,8 @@ let planeMaterial;
 
 //初期化フラグ
 let isInitialized =false;
+//ボタン押したときの関数だけ先に定義
+let handleUpdateButtonClick;
 
 // フォントごとの文字間隔調整値
 const FONT_SPACING_ADJUSTMENTS = {
@@ -307,8 +310,9 @@ function initializeThreeJS(){
     loadBaseTexture(initialTextureFile);
     //updatePlaneTexture(initialText);
     
-    async function handleUpdateButtonClick() {
-        const textValue = textInput.value;
+    handleUpdateButtonClick = async function() {
+        const textValue = document.getElementById('text-input').value;
+        const fontFamilyInput = document.getElementById('font-family-input');
         const currentFont = fontFamilyInput.value;
 
         if (typeof Typekit !== 'undefined' && Typekit.load){
@@ -322,12 +326,12 @@ function initializeThreeJS(){
         // すべての必要なリソース（背景テクスチャ、木目テクスチャ）がロードされているか確認して更新
         if (baseTextureImage.complete && woodTexture && woodTexture.image.complete) {
             updatePlaneTexture(textValue);
+        }else {
+            // ロードが完了していない場合はコンソールに出力
+            console.warn("テクスチャのロードが完了していません。");
         }
     }
-    //window.addEventListener('triggerUpdate', async () => {
-        // 当関数外のonUpdateClickから発火されたら、既存の更新処理を実行
-    //    await handleUpdateButtonClick();
-    //});
+
 }
 
 /**
