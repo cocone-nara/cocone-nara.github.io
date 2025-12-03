@@ -56,6 +56,7 @@ const FONT_SPACING_ADJUSTMENTS = {
     'ta-engeifude': 0
 };
 
+
 //ここから処理-------------------
 
 // スライダーの値が変更されたときの処理
