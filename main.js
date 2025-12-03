@@ -50,7 +50,7 @@ window.addEventListener('DOMContentLoaded', () => {
         woodTexture = texture;
         initializeThreeJS();
     }, undefined, (error) =>{
-        console.error('テクスチャのロードに失敗しました', error);
+        //console.error('テクスチャのロードに失敗しました', error);
         initializeThreeJS();
     });
 });
@@ -126,7 +126,7 @@ function initializeThreeJS(){
             updatePlaneTexture(textInput.value || '試作品');
         };
         baseTextureImage.onerror = () => {
-            console.error(`背景テクスチャのロードに失敗しました: /texture/${filename}`);
+            //console.error(`背景テクスチャのロードに失敗しました: /texture/${filename}`);
         };
         // 既存テクスチャをロード（パスは適宜調整してください）
         baseTextureImage.src = `/texture/${filename}`;
@@ -155,7 +155,7 @@ function initializeThreeJS(){
         FONT_SIZE = 120;
         }   
         FONT_SIZE = FONT_SIZE * scaleFactor;
-        console.log(FONT_SIZE);
+        //console.log(FONT_SIZE);
 
         //字間調整 テキストエリアの高さを計算 文字数*フォント別字間
         const characters = text.split('');
@@ -294,9 +294,9 @@ function initializeThreeJS(){
                 Typekit.load({kitId: 'jzc7gce'});
             }
         if (currentFont !== 'sans-serif' && textValue.length > 0) {
-            console.log(`フォント「${currentFont}」のロードを待機中...`);
+            //console.log(`フォント「${currentFont}」のロードを待機中...`);
             await waitForFont(currentFont, textValue);
-        console.log('フォントのロード完了。テクスチャを更新します。');
+            //console.log('フォントのロード完了。テクスチャを更新します。');
         }
         // すべての必要なリソース（背景テクスチャ、木目テクスチャ）がロードされているか確認
         if (baseTextureImage.complete && woodTexture && woodTexture.image.complete) {
